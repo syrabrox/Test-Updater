@@ -32,12 +32,9 @@ def needToUpdate(url, file_path):
         print("Unable to fetch data from the URL.")
         return "Fetch Error"
 
-def update_directory_with_github_url(local_path, github_url):
-    # Files and folders to exclude from deletion
+def update(local_path, github_url):
     exclude_folders = ['.upm', '.pythonlibs']
     exclude_files = ['.replit', 'pyproject.toml', 'poetry.lock']
-
-    # Delete everything except files and folders in the exclusion list
     for root, dirs, files in os.walk(local_path, topdown=False):
         for file in files:
             if file not in exclude_files:
@@ -45,10 +42,7 @@ def update_directory_with_github_url(local_path, github_url):
         for dir in dirs:
             if dir not in exclude_folders:
                 os.rmdir(os.path.join(root, dir))
-
-    # Clone the GitHub repository into the local directory
     Repo.clone_from(github_url, local_path)
-
     print("Update completed successfully!")
 
 url_to_check = "https://raw.githubusercontent.com/syrabrox/Test-Updater/main/version.txt"
@@ -56,7 +50,6 @@ file_path_to_check = "version.txt"
 checker = needToUpdate(url_to_check, file_path_to_check)
 downloadUrl = "https://github.com/syrabrox/Test-Updater.git"
 if checker:
-  # update!
   print(checker)
   update(os.getcwd(), downloadUrl)
 else:
