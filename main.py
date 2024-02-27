@@ -18,7 +18,6 @@ def needToUpdate(url, file_path):
         try:
             with open(file_path, 'r') as file:
                 file_data = file.read()
-                print(file_data)
                 if url_data == file_data.strip():
                     print("Data from URL matches data in the file.")
                     return False
